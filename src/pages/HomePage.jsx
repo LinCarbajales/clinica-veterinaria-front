@@ -2,12 +2,12 @@ import React from "react";
 
 import "./HomePage.css";
 import Pets from "../assets/imgs/banner.png"; 
-import  AtencionPersonalizada from "../assets/imgs/atencion.png"; 
-import HospitalizacionIcon from "../assets/imgs/Hospitalizacion.png";
-import InstalacionesIcon from "../assets/imgs/instalaciones.png";
-import AmbienteIcon from "../assets/imgs/ambiente.png";
-import EquipoIcon from "../assets/imgs/equipo.png";
-import TijerasIcon from "../assets/imgs/peluqueria.png";
+import  AtencionPersonalizada from "../assets/imgs/atencionFix.png"; 
+import HospitalizacionIcon from "../assets/imgs/hospitalizacionFix.png";
+import InstalacionesIcon from "../assets/imgs/instalacionesFix.png";
+import AmbienteIcon from "../assets/imgs/ambienteFix.png";
+import EquipoIcon from "../assets/imgs/equipoFix.png";
+import TijerasIcon from "../assets/imgs/peluqueriaFix.png";
 import Button from "../components/button/Button.jsx"
 
 

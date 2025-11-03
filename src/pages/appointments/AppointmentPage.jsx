@@ -3,20 +3,34 @@ import appointmentsService from "../../services/appointments/AppointmentsService
 import pacientsService from '../../services/pacients/PacientsService';
 import { useAuth } from "../../context/AuthContext";
 import "./AppointmentPage.css";
+import { useNavigate, useLocation } from "react-router-dom";
+
+
+import SuccessModal from "../../components/successModal/SuccessModal";
 
 const AppointmentsPage = () => {
- const { user } = useAuth();
-  const [isUrgent, setIsUrgent] = useState(false);
-  const [reason, setReason] = useState("Vacunación anual");
-  const [patientId, setPatientId] = useState("");
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const editAppointment = location.state?.appointment || null;
+  const isEditMode = !!editAppointment;
+
+  const [isUrgent, setIsUrgent] = useState(editAppointment ? editAppointment.type : false);
+  const [reason, setReason] = useState(editAppointment ? editAppointment.reason : "");
+  const [date, setDate] = useState("");
+  const [patientId, setPatientId] = useState(editAppointment ? String(editAppointment.patientId) : "");
   const [pets, setPets] = useState([]);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState("");
+  const initialDate = editAppointment ? new Date(editAppointment.appointmentDatetime).getDate() : null;
+  const initialTime = editAppointment ? new Date(editAppointment.appointmentDatetime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }) : "";
+  const [selectedDate, setSelectedDate] = useState(initialDate);
+  const [selectedTime, setSelectedTime] = useState(initialTime);
 
-  const times = ["09:00", "09:30", "10:00", "10:35", "11:00", "11:30", "16:30", "18:00"];
+  const times = ["09:00", "09:30", "10:00", "10:35", "11:00", "11:30", "12:00", "12:30", "16:30", "18:00"];
 
 
   useEffect(() => {
@@ -32,7 +46,7 @@ const AppointmentsPage = () => {
         setPets(petsData);
 
         if (petsData.length > 0) {
-          setPatientId(petsData[0].id_patient); 
+          setPatientId(petsData[0].id_patient);
         }
       } catch (err) {
         console.error("Error al cargar mascotas del usuario:", err);
@@ -41,6 +55,7 @@ const AppointmentsPage = () => {
     };
 
     fetchPets();
+  
   }, []);
 
   const handleSubmit = async (e) => {
@@ -64,7 +79,7 @@ const AppointmentsPage = () => {
     }
 
     const day = String(selectedDate).padStart(2, "0");
-    const month = "09"; 
+    const month = "09";
     const year = "2025";
     const appointmentDatetime = `${year}-${month}-${day}T${selectedTime}:00`;
 
@@ -77,21 +92,28 @@ const AppointmentsPage = () => {
       userId: parseInt(localStorage.getItem("userId"), 10),
     };
 
-    console.log("Cita a enviar:", appointmentData);
-
     try {
-      const result = await appointmentsService.createAppointment(appointmentData);
-      setSuccess("¡Cita creada con éxito!");
-      console.log("Cita creada:", result);
+      if (isEditMode) {
+        await appointmentsService.updateAppointment(editAppointment.id_appointment, appointmentData);
+      } else {
+        await appointmentsService.createAppointment(appointmentData);
+      }
+      setIsModalOpen(true);
     } catch (error) {
-      setError("Error al crear la cita. Por favor, inténtelo de nuevo.");
-      console.error("Error al crear la cita:", error);
+      setError(isEditMode ? "Error al actualizar la cita. Por favor, inténtelo de nuevo." : "Error al crear la cita. Por favor, inténtelo de nuevo.");
+      console.error(isEditMode ? "Error al actualizar la cita:" : "Error al crear la cita:", error);
     }
+    console.log("Cita a enviar:", appointmentData);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    navigate("/customer-area"); 
   };
 
   return (
     <div className="appointments">
-      <h1 className="appointments__title">Sistema de Gestión de Citas Online</h1>
+  <h1 className="appointments__title">{isEditMode ? "Editar cita" : "Sistema de Gestión de Citas Online"}</h1>
 
       <div className="appointments__container">
         <div className="appointments__instructions">
@@ -104,7 +126,6 @@ const AppointmentsPage = () => {
         </div>
 
         <form className="appointments__form" onSubmit={handleSubmit}>
- 
           <div className="appointments__form-row">
             <input
               className="appointments__input"
@@ -116,7 +137,6 @@ const AppointmentsPage = () => {
             />
           </div>
 
-     
           <div className="appointments__form-row">
             <label>Selecciona tu mascota:</label>
             <select
@@ -134,7 +154,6 @@ const AppointmentsPage = () => {
             </select>
           </div>
 
-
           <div className="appointments__form-row">
             <label className="appointments__checkbox-label">
               <input
@@ -145,7 +164,6 @@ const AppointmentsPage = () => {
               ¿Es urgente?
             </label>
           </div>
-
 
           <div className="appointments__calendar">
             <h3>Septiembre 2025</h3>
@@ -165,7 +183,6 @@ const AppointmentsPage = () => {
             </div>
           </div>
 
-
           <div className="appointments__times">
             {times.map((time) => (
               <button
@@ -181,15 +198,22 @@ const AppointmentsPage = () => {
             ))}
           </div>
 
-
           <button type="submit" className="appointments__submit">
-            Confirmar cita
+            {isEditMode ? "Actualizar cita" : "Confirmar cita"}
           </button>
 
-          {success && <p className="appointments__success">{success}</p>}
           {error && <p className="appointments__error">{error}</p>}
         </form>
       </div>
+
+      {isModalOpen && (
+        <SuccessModal
+          title={isEditMode ? "✅ Cita actualizada con éxito" : "✅ Cita creada con éxito"}
+          message={isEditMode ? "Tu cita ha sido actualizada correctamente." : "Tu cita ha sido registrada correctamente."}
+          buttonText="Ir a mi área"
+          onClose={handleModalClose}
+        />
+      )}
     </div>
   );
 };

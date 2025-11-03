@@ -22,6 +22,21 @@ class UserRepository {
         }
         return await response.json();
     }
+
+        async update(id, userData) {
+            const response = await fetch(`${this.baseUrl}/users/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(userData),
+            });
+            if (!response.ok) {
+                throw new Error(`Error al actualizar el usuario (${response.status})`);
+            }
+            return await response.json();
+        }
 }
 
 export default UserRepository;

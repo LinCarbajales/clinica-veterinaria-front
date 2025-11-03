@@ -46,6 +46,14 @@
 .login-modal__header {
   text-align: center;
 }
+.login-modal__logo-img {
+  width: 32px !important;
+  height: 32px !important;
+  max-width: 32px;
+  max-height: 32px;
+  object-fit: contain;
+  display: inline-block;
+}
 
 .login-modal__logo-text {
   font-weight: 600;
@@ -168,6 +176,7 @@
   cursor: pointer;
   text-decoration: underline;
 }
+
 
 .login-modal__footer-link:hover {
   color: var(--color-primary);

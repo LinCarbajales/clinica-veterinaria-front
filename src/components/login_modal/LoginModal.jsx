@@ -4,6 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import './LoginModal.css';
 import { Link } from 'react-router-dom';
 
+
+
 const LoginModal = ({ isOpen, onClose }) => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const [isLoading, setIsLoading] = useState(false);
@@ -48,8 +50,6 @@ const LoginModal = ({ isOpen, onClose }) => {
 
         <div className="login-modal__header">
           <div className="login-modal__logo">
-            <span className="login-modal__logo-text">Margarita</span>
-            <span className="login-modal__logo-subtitle">LOGO</span>
           </div>
         </div>
 

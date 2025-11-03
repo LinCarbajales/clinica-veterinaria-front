@@ -1,38 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Hero from '../../components/hero/Hero';
 import { useForm } from 'react-hook-form';
+import userService from '../../services/user/UserService';
 import registerService from '../../services/register/RegisterService';
+import { useNavigate } from 'react-router-dom';
+import SuccessModal from '../../components/successModal/SuccessModal';
 import './RegistrationPage.css';
 
 const RegistrationPage = () => {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, formState: { errors }, setValue } = useForm();
   const [isLoading, setIsLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   const onSubmit = async (data) => {
     setIsLoading(true);
     setSubmitError('');
 
     try {
-      const result = await registerService.registerUser(data);
-      
-      if (result.success && result.status === 201) {
-        console.log('Registro realizado con éxito:', result.data);
-        alert('¡Registro realizado con éxito!');
-        
-        // Opcional: redireccionar o limpiar el formulario
-        // reset(); // Para limpiar el formulario
-        // navigate('/login'); // Para redireccionar
+      if (isEditMode && userId) {
+        const result = await userService.updateUser(userId, data);
+        if (result) {
+          setSuccessMessage("✅ Usuario actualizado con éxito");
+          setIsSuccessModalOpen(true);
+        }
+      } else {
+        const result = await registerService.registerUser(data);
+        if (result.success && result.status === 201) {
+          setSuccessMessage("✅ Registro realizado con éxito");
+          setIsSuccessModalOpen(true);
+        }
       }
     } catch (error) {
-      console.error('Error en el registro:', error);
-      setSubmitError(error.message || 'Error al procesar el registro');
+      console.error('Error en el registro/edición:', error);
+      setSubmitError(error.message || 'Error al procesar el registro/edición');
     } finally {
       setIsLoading(false);
     }
   };
+  const navigate = useNavigate();
 
-  // Para comparar passwords
+  useEffect(() => {
+ 
+    const storedUserId = localStorage.getItem('userId');
+    if (storedUserId) {
+      setIsEditMode(true);
+      setUserId(storedUserId);
+  
+      const fetchUser = async () => {
+        try {
+          const userData = await userService.getUserById(storedUserId);
+
+          setValue('name', userData.name || '');
+          setValue('firstSurname', userData.firstSurname || '');
+          setValue('secondSurname', userData.secondSurname || '');
+          setValue('dni', userData.dni || '');
+          setValue('phoneNumber', userData.phoneNumber || '');
+          setValue('email', userData.email || '');
+        
+        } catch (error) {
+          console.error('Error cargando datos de usuario:', error);
+        }
+      };
+      fetchUser();
+    }
+  }, [setValue]);
+
+
   const watchPassword = watch("password");
 
   return (
@@ -244,6 +281,17 @@ const RegistrationPage = () => {
               </div>
             </div>
           </section>
+          {isSuccessModalOpen && (
+            <SuccessModal
+              title={isEditMode ? "✅ Usuario actualizado con éxito" : "✅ Registro realizado con éxito"}
+              message={isEditMode ? "Tus datos han sido actualizados correctamente." : "Tu registro ha sido realizado correctamente."}
+              buttonText={isEditMode ? "Ir a mi área" : "Ir a inicio"}
+              onClose={() => {
+                setIsSuccessModalOpen(false);
+                navigate(isEditMode ? "/customer-area" : "/");
+              }}
+            />
+          )}
 
           {/* Submit Button */}
           <div className="registration-form__submit">
@@ -252,7 +300,9 @@ const RegistrationPage = () => {
               disabled={isLoading}
               className={`registration-form__button ${isLoading ? 'registration-form__button--loading' : ''}`}
             >
-              {isLoading ? 'Registrando...' : 'Registrarse'}
+              {isLoading
+                ? (isEditMode ? 'Actualizando...' : 'Registrando...')
+                : (isEditMode ? 'Actualizar usuario' : 'Registrarse')}
             </button>
           </div>
         </form>

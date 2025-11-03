@@ -27,14 +27,7 @@ export const UserListPage = () => {
         { header: "Primer Apellido", accessor: "firstSurname" },
         { header: "Segundo Apellido", accessor: "secondSurname" },
         { header: "Teléfono", accessor: "phoneNumber" },
-        {
-            header: "Detalles",
-            render: (fila) => (
-              <Link to={`/admin/user/${fila.id_user}`} className="leer-mas">
-                Leer más
-              </Link>
-            )
-          }
+
       ];
 
     const dataToShow = users;
@@ -55,7 +48,6 @@ export const UserListPage = () => {
             placeholder="Buscar usuario..."
             onSearch={(value) => setSearchTerm(value)}
             />
-            <Button></Button>
         </span>
         </div>
         <div className="divider-div">

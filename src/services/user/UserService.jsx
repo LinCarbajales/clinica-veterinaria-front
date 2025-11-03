@@ -26,6 +26,17 @@ class UserService {
             throw error;
         }
     }
+
+        async updateUser(id, userData) {
+            try {
+                const result = await this.userRepository.update(id, userData);
+                console.log(`Usuario con ID ${id} actualizado con éxito:`, result);
+                return result;
+            } catch (error) {
+                console.error(`Error en UserService.updateUser(${id}):`, error);
+                throw error;
+            }
+        }
 }
 
 const userService = new UserService();

@@ -15,36 +15,51 @@ const Header = () => {
   const closeLoginModal = () => setLoginModalOpen(false);
 
   const handleAreaClick = () => {
-
     if (user?.roles[0] === "ROLE_ADMIN") {
-      navigate("/admin");
+      navigate("/home-admin");
     } else {
       navigate("/customer-area");
     }
   };
+
+
+  const areaText =
+    user?.roles?.includes("ROLE_ADMIN") ? "Zona Admin" : "Área personal";
 
   return (
     <>
       <header className="header">
         <div className="header__logo">
           <Link to="/">
-            <img src={logo} alt="Logo Margarita" className="header__logo-image" />
+            <img
+              src={logo}
+              alt="Logo Margarita"
+              className="header__logo-image"
+            />
           </Link>
         </div>
 
         <nav className={`header__nav ${isMenuOpen ? "header__nav--open" : ""}`}>
           <ul className="header__list">
             <li className="header__item">
-              <Link to="/" className="header__link">Inicio</Link>
+              <Link to="/" className="header__link">
+                Inicio
+              </Link>
             </li>
             <li className="header__item">
-            <Link to="/quienes-somos" className="header__link">Quiénes Somos</Link>
+              <Link to="/quienes-somos" className="header__link">
+                Quiénes Somos
+              </Link>
             </li>
             <li className="header__item">
-             <Link to="/servicios" className="header__link">Servicios</Link>
+              <Link to="/servicios" className="header__link">
+                Servicios
+              </Link>
             </li>
             <li className="header__item">
-            <Link to="/contacto" className="header__link">Contacto</Link>
+              <Link to="/contacto" className="header__link">
+                Contacto
+              </Link>
             </li>
           </ul>
         </nav>
@@ -56,9 +71,12 @@ const Header = () => {
                 Hola, <strong>{user?.name || "Usuario"}</strong>
               </span>
               <div className="header__user-options">
-                <Link onClick={handleAreaClick} className="header__user-link">
-                  Área personal
-                </Link>
+                <button
+                  onClick={handleAreaClick}
+                  className="header__user-link header__user-link--button"
+                >
+                  {areaText}
+                </button>
                 <span>|</span>
                 <button
                   onClick={logout}

@@ -59,7 +59,7 @@ export const PatientList = () => {
             placeholder="Buscar paciente..."
             onSearch={(value) => setSearchTerm(value)}
           />
-          <Button></Button>
+       
         </span>
       </div>
       <div className="divider-div">

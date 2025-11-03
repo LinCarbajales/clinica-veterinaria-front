@@ -73,29 +73,28 @@ const PatientCreationPage = () => {
 
       if (isEditMode) {
         await pacientsService.updatePatient(location.state.patient.id_patient, data);
-        setSuccessMessage("¡Paciente actualizado con éxito!"); 
+        setSuccessMessage("✅ ¡Paciente actualizado con éxito!"); 
       } else {
         await pacientsService.createPatient(data);
-        setSuccessMessage("¡Paciente creado con éxito!"); 
+        setSuccessMessage("✅ ¡Paciente creado con éxito!"); 
       }
 
-     
       setIsSuccessModalOpen(true);
-
-   
-      setTimeout(() => {
-        if (user?.roles[0] === "ROLE_ADMIN") {
-          navigate("/listaPacientes");
-        } else {
-          navigate("/customer-area");
-        }
-      }, 2000); 
 
     } catch (error) {
       console.error(`Error en la ${isEditMode ? 'actualización' : 'creación'} del paciente:`, error);
       setSubmitError(error.message || `Error al procesar la ${isEditMode ? 'actualización' : 'creación'}`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsSuccessModalOpen(false);
+    if (user?.roles[0] === "ROLE_ADMIN") {
+      navigate("/home-admin");
+    } else {
+      navigate("/customer-area");
     }
   };
 
@@ -274,20 +273,14 @@ const PatientCreationPage = () => {
         </form>
       </div>
 
-      {/* Modal de éxito */}
-      <SuccessModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => {
-          setIsSuccessModalOpen(false);
-          if (user?.roles[0] === "ROLE_ADMIN") {
-            navigate("/listaPacientes");
-          } else {
-            navigate("/customer-area");
-          }
-        }}
-        title="Operación completada con éxito"
-        text={successMessage}
-      />
+      {isSuccessModalOpen && (
+        <SuccessModal
+          title={successMessage}
+          message="Haz click para volver a la página de gestión"
+          onClose={handleModalClose}
+          buttonText="Cerrar"
+        />
+      )}
     </div>
   );
 };
